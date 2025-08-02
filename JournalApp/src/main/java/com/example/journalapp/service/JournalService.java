@@ -7,6 +7,7 @@ import com.example.journalapp.model.User;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,15 +48,16 @@ public class JournalService {
      * Counts consecutive-day journaling streak up to today.
      */
     public int calculateStreak(User user) throws SQLException {
-        List<JournalEntry> entries = entryDAO.findEntriesByUser(user.getId());
-        Set<LocalDate> dates = entries.stream()
-                .map(e -> e.getCreatedAt().toLocalDate())
-                .collect(Collectors.toSet());
+        List<LocalDate> entryDates = entryDAO.getEntryDates(user.getId());
+        Set<LocalDate> dateSet = new HashSet<>(entryDates);
+
         int streak = 0;
         LocalDate today = LocalDate.now();
-        while (dates.contains(today.minusDays(streak))) {
+        
+        while (dateSet.contains(today.minusDays(streak))) {
             streak++;
         }
+
         return streak;
     }
 }
